@@ -20,7 +20,7 @@ export default function App() {
       query: string;
     }[]
   >([]);
-  const [templates, setTemplates] = useState([
+  const [templates] = useState([
     dummyQueries[1],
     dummyQueries[2],
     dummyQueries[3],

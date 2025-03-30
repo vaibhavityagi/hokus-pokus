@@ -23,11 +23,11 @@ interface ResultsTableProps {
 export function ResultsTable({
   results,
   viewType,
-  // currentPage,
-  // pageSize,
-  // setCurrentPage,
-  // setPageSize,
-}: ResultsTableProps) {
+}: // currentPage,
+// pageSize,
+// setCurrentPage,
+// setPageSize,
+ResultsTableProps) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [containerHeight, setContainerHeight] = useState(400);
@@ -139,7 +139,7 @@ export function ResultsTable({
             <YAxis />
             <Tooltip />
             <Bar dataKey="value" fill="#8884d8">
-              {chartData.map((entry, index) => (
+              {chartData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={colors[index % colors.length]}

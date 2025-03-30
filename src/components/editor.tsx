@@ -1,39 +1,19 @@
-import { useEffect } from "react"
-import { Textarea } from "@/components/ui/textarea"
+
 
 interface QueryEditorProps {
-  value: string
-  onChange: (value: string) => void
-  onRun: (query: string) => void
+  value: string;
+  handleQuery: (value: string) => void;
 }
 
-export function QueryEditor({ value, onChange, onRun }: QueryEditorProps) {
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+Enter or Cmd+Enter to run query
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        e.preventDefault()
-        onRun(value)
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown)
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [value, onRun])
-
+export function QueryEditor({ value, handleQuery }: QueryEditorProps) {
   return (
-    <div className="relative">
-      <Textarea
+    <div className="query-editor-container">
+      <textarea
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="min-h-[120px] font-mono text-sm resize-y p-4"
-        placeholder="Enter SQL query..."
+        onChange={(e) => handleQuery(e.target.value)}
+        className="query-textarea"
+        placeholder="Write your query here"
       />
-      <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">Press Ctrl+Enter to run</div>
     </div>
-  )
+  );
 }
-

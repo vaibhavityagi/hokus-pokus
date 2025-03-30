@@ -1,50 +1,51 @@
-import { useState } from "react";
-import { Download, Moon, Save, Sun, Terminal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import { Download, Terminal, Copy } from "lucide-react";
 import { QueryEditor } from "./components/editor";
 import { ResultsTable } from "./components/table";
 import { QueryHistory } from "./components/history";
-import { SavedQueries } from "./components/saved-queries";
+import { Templates } from "./components/templates";
 import { dummyQueries } from "./lib/dummy-queries";
+import "./App.css";
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [activeQuery, setActiveQuery] = useState(dummyQueries[0]);
-  const [queryHistory, setQueryHistory] = useState([dummyQueries[0]]);
-  const [savedQueries, setSavedQueries] = useState([
+  // const [darkMode, setDarkMode] = useState(false);
+  const [activeQuery, setActiveQuery] = useState<{
+    name: string;
+    query: string;
+    results: any[];
+  }>();
+  const [queryHistory, setQueryHistory] = useState<
+    {
+      name: string;
+      query: string;
+    }[]
+  >([]);
+  const [templates, setTemplates] = useState([
     dummyQueries[1],
     dummyQueries[2],
+    dummyQueries[3],
   ]);
-  const [executionTime, setExecutionTime] = useState("0.24");
   const [viewType, setViewType] = useState("table");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [pageSize, setPageSize] = useState(10);
+  const [activeTab, setActiveTab] = useState("history");
+  const [query, setQuery] = useState("");
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
-  };
+  // const toggleDarkMode = () => {
+  //   setDarkMode(!darkMode);
+  //   document.documentElement.classList.toggle("dark");
+  // };
+
+  useEffect(() => {
+    // Load query history from local storage
+    const storedHistory = localStorage.getItem("queryHistory");
+    if (storedHistory) {
+      const parsedHistory = JSON.parse(storedHistory);
+      setQueryHistory(parsedHistory);
+    }
+  }, []);
 
   const runQuery = (query: string) => {
-    // Simulate query execution time
-    const randomTime = (Math.random() * 0.5 + 0.1).toFixed(2);
-    setExecutionTime(randomTime);
-
     // Find matching query or use the first one
     const matchingQuery = dummyQueries.find(
       (q) => q.query.trim() === query.trim()
@@ -54,26 +55,41 @@ export default function App() {
     };
 
     setActiveQuery(matchingQuery);
+    setQuery(query);
 
-    // Add to history if not already there
-    if (!queryHistory.some((q) => q.query.trim() === query.trim())) {
-      setQueryHistory([matchingQuery, ...queryHistory].slice(0, 10));
+    // Add to history
+    const isQueryInHistory = queryHistory.some(
+      (q) => q.query.trim() === matchingQuery.query.trim()
+    );
+
+    if (!isQueryInHistory) {
+      const queryMetadata = {
+        id: `query_${Date.now()}`,
+        name: matchingQuery.name,
+        query: matchingQuery.query,
+        timestamp: Date.now(),
+      };
+      const updatedHistory = [queryMetadata, ...queryHistory].slice(0, 10);
+      setQueryHistory(updatedHistory);
+      localStorage.setItem("queryHistory", JSON.stringify(updatedHistory));
     }
   };
 
-  const saveQuery = () => {
-    if (
-      !savedQueries.some((q) => q.query.trim() === activeQuery.query.trim())
-    ) {
-      setSavedQueries([activeQuery, ...savedQueries]);
-    }
-  };
+  // const saveQuery = () => {
+  //   if (
+  //     activeQuery &&
+  //     !templates.some((q) => q.query.trim() === activeQuery.query.trim())
+  //   ) {
+  //     setTemplates([activeQuery, ...templates]);
+  //   }
+  // };
 
+  // !! TODO: Implement this function
   const exportResults = () => {
     // Simulate export functionality
     const dataStr =
       "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(activeQuery.results));
+      encodeURIComponent(JSON.stringify(activeQuery?.results || []));
     const downloadAnchorNode = document.createElement("a");
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", "query_results.json");
@@ -83,144 +99,142 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${darkMode ? "dark" : ""}`}>
-      <header className="border-b bg-background">
-        <div className="container flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-2">
-            <Terminal className="h-6 w-6" />
-            <h1 className="text-xl font-bold">Query searcher</h1>
+    // <div className={`app-container ${darkMode ? "dark" : ""}`}>
+    <div>
+      <header className="app-header">
+        <div className="header-content">
+          <div className="logo-section">
+            <Terminal className="icon" />
+            <h1 className="header-title">Query searcher</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={toggleDarkMode}
-                  >
-                    {darkMode ? (
-                      <Sun className="h-4 w-4" />
-                    ) : (
-                      <Moon className="h-4 w-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Toggle dark mode</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="header-controls">
+            {/* <button
+              className="btn btn-outline icon-btn tooltip"
+              onClick={toggleDarkMode}
+              title="Toggle dark mode"
+            >
+              {darkMode ? (
+                <Sun className="icon-small" />
+              ) : (
+                <Moon className="icon-small" />
+              )}
+            </button> */}
           </div>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-64 border-r bg-muted/40 p-4 hidden md:block">
-          <Tabs defaultValue="history">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="history">History</TabsTrigger>
-              <TabsTrigger value="saved">Saved</TabsTrigger>
-            </TabsList>
-            <TabsContent value="history" className="mt-2">
-              <QueryHistory
-                queries={queryHistory}
-                onSelect={(query) => setActiveQuery(query)}
-              />
-            </TabsContent>
-            <TabsContent value="saved" className="mt-2">
-              <SavedQueries
-                queries={savedQueries}
-                onSelect={(query) => setActiveQuery(query)}
-              />
-            </TabsContent>
-          </Tabs>
+      <div className="main-container">
+        <aside className="sidebar">
+          <div className="tabs">
+            <div className="tabs-list">
+              <button
+                className={`tabs-trigger ${
+                  activeTab === "history" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("history")}
+              >
+                History
+              </button>
+              <button
+                className={`tabs-trigger ${
+                  activeTab === "template" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("template")}
+              >
+                Templates
+              </button>
+            </div>
+            <div className="tabs-content">
+              {activeTab === "history" && (
+                <QueryHistory
+                  queries={queryHistory}
+                  handleClick={(query) => {
+                    console.log("Query clicked:", query);
+                    runQuery(query.query);
+                  }}
+                />
+              )}
+              {activeTab === "template" && (
+                <Templates
+                  queries={templates}
+                  onSelect={(query) => {
+                    setActiveQuery(query);
+                    setQuery(query.query);
+                  }}
+                />
+              )}
+            </div>
+          </div>
         </aside>
 
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-4 border-b">
+        <main className="content">
+          <div className="editor-section">
             <QueryEditor
-              value={activeQuery.query}
-              onChange={(value) =>
-                setActiveQuery({ ...activeQuery, query: value })
-              }
-              onRun={runQuery}
+              value={query}
+              handleQuery={(value) => setQuery(value)}
             />
-            <div className="flex justify-between items-center mt-2">
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => runQuery(activeQuery.query)}
-                  className="bg-primary"
+            <div
+              className="editor-controls"
+              style={{ display: "flex", justifyContent: "space-between" }}
+            >
+              <button
+                className="btn btn-primary"
+                onClick={() => query && runQuery(query)}
+              >
+                Run Query
+              </button>
+              {/* <button
+                className="btn btn-outline icon-btn tooltip"
+                onClick={saveQuery}
+                title="Save query"
+              >
+                <Save className="icon-small" />
+              </button> */}
+              <div style={{ display: "flex", gap: "10px" }}>
+                <select
+                  className="select-control"
+                  value={viewType}
+                  onChange={(e) => setViewType(e.target.value)}
                 >
-                  Run Query
-                </Button>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline" size="icon" onClick={saveQuery}>
-                        <Save className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Save query</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <span className="text-sm text-muted-foreground">
-                  Execution time: {executionTime}s
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Select value={viewType} onValueChange={setViewType}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="View" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="table">Table</SelectItem>
-                    <SelectItem value="json">JSON</SelectItem>
-                    <SelectItem value="chart">Chart</SelectItem>
-                  </SelectContent>
-                </Select>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={exportResults}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Export results</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                  <option value="table">Table</option>
+                  <option value="json">JSON</option>
+                  <option value="chart">Chart</option>
+                </select>
+                <button
+                  onClick={() => navigator.clipboard.writeText(query)}
+                  className="copy-button"
+                >
+                  <Copy size={20} color="#2026d2" />
+                </button>
+                <button onClick={exportResults} title="Export results">
+                  <Download size={20} color="#2026d2" />
+                </button>
               </div>
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-4">
-            <Card className="h-full overflow-hidden">
-              <div className="p-4 border-b bg-muted/40 flex justify-between items-center">
-                <h3 className="font-medium">Query Results</h3>
-                <span className="text-sm text-muted-foreground">
-                  {activeQuery.results.length} rows
-                </span>
+          {activeQuery && (
+            <div className="results-section">
+              <div className="card">
+                <div className="card-header">
+                  <h3 className="card-title">Query Results</h3>
+                  <span className="card-subtitle">
+                    {activeQuery.results.length} rows
+                  </span>
+                </div>
+                <div className="card-body">
+                  <ResultsTable
+                    results={activeQuery.results}
+                    viewType={viewType}
+                    // currentPage={currentPage}
+                    // pageSize={pageSize}
+                    // setCurrentPage={setCurrentPage}
+                    // setPageSize={setPageSize}
+                  />
+                </div>
               </div>
-              <div className="p-0 overflow-auto h-[calc(100%-3rem)]">
-                <ResultsTable
-                  results={activeQuery.results}
-                  viewType={viewType}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  setCurrentPage={setCurrentPage}
-                  setPageSize={setPageSize}
-                />
-              </div>
-            </Card>
-          </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

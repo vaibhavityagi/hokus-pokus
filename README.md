@@ -34,6 +34,10 @@ An intuitive SQL query tool inspired by MySQL Workbench designed to streamline d
 - Export results as CSV for spreadsheet analysis
 - Export results as JSON for programmatic use
 
+## Application Architecture
+
+![alt text](applicationArchitecture.png)
+
 ## Tech Stack
 
 - Frontend: React, React Virtualized

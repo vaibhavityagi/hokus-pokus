@@ -14,8 +14,7 @@
     "path": "^0.12.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-window": "^1.8.11",
-    "recharts": "^2.15.1"
+    "react-window": "^1.8.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

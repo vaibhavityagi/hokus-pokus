@@ -1,15 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { FixedSizeList as List } from "react-window";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
 
 interface TableProps {
   results: any[];
@@ -76,65 +66,6 @@ export function Table({ results, viewType }: TableProps) {
     return (
       <div className="json-view">
         <pre>{JSON.stringify(results, null, 2)}</pre>
-      </div>
-    );
-  }
-
-  // chart view
-  if (viewType === "chart") {
-    const numericColumns = columns.filter(
-      (col) => typeof results[0][col] === "number"
-    );
-
-    if (numericColumns.length === 0) {
-      return <div className="no-results">No numeric data to chart</div>;
-    }
-
-    const chartData = results.slice(0, 10).map((row) => ({
-      name: row[columns[0]],
-      value: row[numericColumns[0]],
-    }));
-
-    const colors = [
-      "#8884d8",
-      "#83a6ed",
-      "#8dd1e1",
-      "#82ca9d",
-      "#a4de6c",
-      "#d0ed57",
-      "#ffc658",
-      "#ff8042",
-      "#ff6361",
-      "#bc5090",
-    ];
-
-    return (
-      <div className="chart-container">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="name"
-              angle={-45}
-              textAnchor="end"
-              height={70}
-              tick={{ fontSize: 12 }}
-            />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8">
-              {chartData.map((_, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={colors[index % colors.length]}
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Copy } from "lucide-react";
+import { Copy } from "lucide-react";
 import { Editor } from "./components/Editor";
 import { Table } from "./components/Table";
 import { History } from "./components/History";
@@ -192,7 +192,6 @@ export default function App() {
                 >
                   <option value="table">Table</option>
                   <option value="json">JSON</option>
-                  <option value="chart">Chart</option>
                 </select>
 
                 <div className="export-dropdown">

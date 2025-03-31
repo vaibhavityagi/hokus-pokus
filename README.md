@@ -19,7 +19,6 @@ An intuitive SQL query tool inspired by MySQL Workbench designed to streamline d
   - Virtualized rendering for smooth performance with large datasets using `react-window`
   - Row count display
 - **JSON View**: See the raw data structure
-- **Chart View**: Automatically visualize numeric data for quick insights
 
 ### Query Management
 
@@ -37,7 +36,7 @@ An intuitive SQL query tool inspired by MySQL Workbench designed to streamline d
 
 ## Tech Stack
 
-- Frontend: React, React Virtualized, Recharts
+- Frontend: React, React Virtualized
 - Styling: CSS Modules
 
 ## Quick Start

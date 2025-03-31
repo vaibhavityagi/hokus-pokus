@@ -52,4 +52,7 @@ An intuitive SQL query tool inspired by MySQL Workbench designed to streamline d
 
 ## Performance Metrics
 
+- Metrics are calculated using Firefox Profiler.
+- Used `react-window` and `useMemo` to improve the performance of the application. 
+
 ![alt text](image-1.png)

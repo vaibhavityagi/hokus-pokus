@@ -49,3 +49,7 @@ An intuitive SQL query tool inspired by MySQL Workbench designed to streamline d
 2. `cd hokus-pokus`
 3. Run `npm install` to install all the dependencies
 4. Run `npm run dev` to start the application on localhost:5713
+
+## Performance Metrics
+
+![alt text](image-1.png)

@@ -56,3 +56,8 @@ An intuitive SQL query tool inspired by MySQL Workbench designed to streamline d
 - Used `react-window` and `useMemo` to improve the performance of the application. 
 
 ![alt text](image-1.png)
+
+## Important links for the submission
+
+- Live Application URL: https://query-searcher.vercel.app/
+- Demo Video: https://drive.google.com/file/d/1-ZLqHPUn2qaugKwzupPXXbKT_4pRuwgP/view?usp=sharing

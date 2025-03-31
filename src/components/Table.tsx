@@ -11,29 +11,17 @@ import {
   Cell,
 } from "recharts";
 
-interface ResultsTableProps {
+interface TableProps {
   results: any[];
   viewType: string;
-  // currentPage: number;
-  // pageSize: number;
-  // setCurrentPage: (page: number) => void;
-  // setPageSize: (size: number) => void;
 }
 
-export function ResultsTable({
-  results,
-  viewType,
-}: // currentPage,
-// pageSize,
-// setCurrentPage,
-// setPageSize,
-ResultsTableProps) {
+export function Table({ results, viewType }: TableProps) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [containerHeight, setContainerHeight] = useState(400);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Measure container height for virtualization
   useEffect(() => {
     if (containerRef.current) {
       const updateHeight = () => {
@@ -83,7 +71,7 @@ ResultsTableProps) {
     });
   }, [results, sortColumn, sortDirection]);
 
-  // For JSON view
+  // For view
   if (viewType === "json") {
     return (
       <div className="json-view">
@@ -92,9 +80,8 @@ ResultsTableProps) {
     );
   }
 
-  // For chart view
+  // chart view
   if (viewType === "chart") {
-    // Find numeric columns for chart
     const numericColumns = columns.filter(
       (col) => typeof results[0][col] === "number"
     );
@@ -152,10 +139,9 @@ ResultsTableProps) {
     );
   }
 
-  // For table view with virtualization
-  const ROW_HEIGHT = 40; // Adjust based on your row height
+  // table view with virtualization
+  const ROW_HEIGHT = 40;
 
-  // Row renderer for virtualized list
   const Row = ({
     index,
     style,
@@ -182,7 +168,6 @@ ResultsTableProps) {
     );
   };
 
-  // Header renderer
   const TableHeader = () => (
     <div className="virtual-header">
       {columns.map((column, index) => (
@@ -211,7 +196,7 @@ ResultsTableProps) {
         <TableHeader />
         <div className="virtual-table-body">
           <List
-            height={containerHeight - ROW_HEIGHT} // Subtract header height
+            height={containerHeight - ROW_HEIGHT}
             itemCount={sortedResults.length}
             itemSize={ROW_HEIGHT}
             width="100%"

@@ -1,11 +1,9 @@
-
-
-interface QueryEditorProps {
+interface EditorProps {
   value: string;
   handleQuery: (value: string) => void;
 }
 
-export function QueryEditor({ value, handleQuery }: QueryEditorProps) {
+export function Editor({ value, handleQuery }: EditorProps) {
   return (
     <div className="query-editor-container">
       <textarea

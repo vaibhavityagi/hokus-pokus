@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { Download, Terminal, Copy } from "lucide-react";
-import { QueryEditor } from "./components/editor";
-import { ResultsTable } from "./components/table";
-import { QueryHistory } from "./components/history";
-import { Templates } from "./components/templates";
+import { Download, Copy } from "lucide-react";
+import { Editor } from "./components/Editor";
+import { Table } from "./components/Table";
+import { History } from "./components/History";
+import { Templates } from "./components/Templates";
 import { dummyQueries } from "./lib/dummy-queries";
 import "./App.css";
 
 export default function App() {
-  // const [darkMode, setDarkMode] = useState(false);
   const [activeQuery, setActiveQuery] = useState<{
     name: string;
     query: string;
@@ -26,18 +25,10 @@ export default function App() {
     dummyQueries[3],
   ]);
   const [viewType, setViewType] = useState("table");
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [pageSize, setPageSize] = useState(10);
   const [activeTab, setActiveTab] = useState("history");
   const [query, setQuery] = useState("");
 
-  // const toggleDarkMode = () => {
-  //   setDarkMode(!darkMode);
-  //   document.documentElement.classList.toggle("dark");
-  // };
-
   useEffect(() => {
-    // Load query history from local storage
     const storedHistory = localStorage.getItem("queryHistory");
     if (storedHistory) {
       const parsedHistory = JSON.parse(storedHistory);
@@ -75,50 +66,56 @@ export default function App() {
     }
   };
 
-  // const saveQuery = () => {
-  //   if (
-  //     activeQuery &&
-  //     !templates.some((q) => q.query.trim() === activeQuery.query.trim())
-  //   ) {
-  //     setTemplates([activeQuery, ...templates]);
-  //   }
-  // };
-
-  // !! TODO: Implement this function
-  const exportResults = () => {
-    // Simulate export functionality
+  const exportResultsToJson = () => {
     const dataStr =
       "data:text/json;charset=utf-8," +
       encodeURIComponent(JSON.stringify(activeQuery?.results || []));
     const downloadAnchorNode = document.createElement("a");
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "query_results.json");
+    downloadAnchorNode.setAttribute("download", "JSONResults.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  const exportResultsToCSV = () => {
+    if (!activeQuery?.results || activeQuery.results.length === 0) {
+      console.warn("No results to export");
+      return;
+    }
+
+    const headers = Object.keys(activeQuery.results[0]);
+    const csvHeader = headers.join(",");
+
+    const csvRows = activeQuery.results.map((row) => {
+      return headers
+        .map((header) => {
+          const value = row[header] == null ? "" : row[header];
+
+          const escaped = String(value).replace(/"/g, '""').replace(/\n/g, " ");
+          return /[",\n]/.test(escaped) ? `"${escaped}"` : escaped;
+        })
+        .join(",");
+    });
+
+    const csvContent = [csvHeader, ...csvRows].join("\n");
+
+    const dataStr =
+      "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
+    const downloadAnchorNode = document.createElement("a");
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `csvResults.csv`);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   };
 
   return (
-    // <div className={`app-container ${darkMode ? "dark" : ""}`}>
     <div>
       <header className="app-header">
         <div className="header-content">
           <div className="logo-section">
-            <Terminal className="icon" />
             <h1 className="header-title">Query searcher</h1>
-          </div>
-          <div className="header-controls">
-            {/* <button
-              className="btn btn-outline icon-btn tooltip"
-              onClick={toggleDarkMode}
-              title="Toggle dark mode"
-            >
-              {darkMode ? (
-                <Sun className="icon-small" />
-              ) : (
-                <Moon className="icon-small" />
-              )}
-            </button> */}
           </div>
         </div>
       </header>
@@ -146,7 +143,7 @@ export default function App() {
             </div>
             <div className="tabs-content">
               {activeTab === "history" && (
-                <QueryHistory
+                <History
                   queries={queryHistory}
                   handleClick={(query) => {
                     console.log("Query clicked:", query);
@@ -169,10 +166,7 @@ export default function App() {
 
         <main className="content">
           <div className="editor-section">
-            <QueryEditor
-              value={query}
-              handleQuery={(value) => setQuery(value)}
-            />
+            <Editor value={query} handleQuery={(value) => setQuery(value)} />
             <div
               className="editor-controls"
               style={{ display: "flex", justifyContent: "space-between" }}
@@ -183,14 +177,14 @@ export default function App() {
               >
                 Run Query
               </button>
-              {/* <button
-                className="btn btn-outline icon-btn tooltip"
-                onClick={saveQuery}
-                title="Save query"
-              >
-                <Save className="icon-small" />
-              </button> */}
+              `
               <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  onClick={() => navigator.clipboard.writeText(query)}
+                  className="copy-button"
+                >
+                  <Copy size={20} color="#2026d2" />
+                </button>
                 <select
                   className="select-control"
                   value={viewType}
@@ -200,15 +194,21 @@ export default function App() {
                   <option value="json">JSON</option>
                   <option value="chart">Chart</option>
                 </select>
-                <button
-                  onClick={() => navigator.clipboard.writeText(query)}
-                  className="copy-button"
-                >
-                  <Copy size={20} color="#2026d2" />
-                </button>
-                <button onClick={exportResults} title="Export results">
-                  <Download size={20} color="#2026d2" />
-                </button>
+
+                <div className="export-dropdown">
+                  <button
+                    className="btn btn-primary export-button"
+                    title="Export results"
+                  >
+                    Export
+                  </button>
+                  <div className="export-dropdown-content">
+                    <button onClick={exportResultsToJson}>
+                      Export as JSON
+                    </button>
+                    <button onClick={exportResultsToCSV}>Export as CSV</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -223,14 +223,7 @@ export default function App() {
                   </span>
                 </div>
                 <div className="card-body">
-                  <ResultsTable
-                    results={activeQuery.results}
-                    viewType={viewType}
-                    // currentPage={currentPage}
-                    // pageSize={pageSize}
-                    // setCurrentPage={setCurrentPage}
-                    // setPageSize={setPageSize}
-                  />
+                  <Table results={activeQuery.results} viewType={viewType} />
                 </div>
               </div>
             </div>

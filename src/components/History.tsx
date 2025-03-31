@@ -1,11 +1,11 @@
 import { Clock } from "lucide-react";
 
-interface QueryHistoryProps {
+interface HistoryProps {
   queries: any[];
   handleClick: (query: any) => void;
 }
 
-export function QueryHistory({ queries, handleClick }: QueryHistoryProps) {
+export function History({ queries, handleClick }: HistoryProps) {
   if (!queries.length) {
     return <div className="query-history-no-data">No query history</div>;
   }
